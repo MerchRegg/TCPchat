@@ -2,9 +2,11 @@ package mystuff.tcpchat.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 
 public class MyContentProvider extends ContentProvider {
@@ -35,6 +37,34 @@ public class MyContentProvider extends ContentProvider {
         uriMatcher.addURI(AUTHORITY, MESSAGES_TABLE + "/#", MESSAGE_ID);
     }
 
+    /**
+     * Helper class that actually creates and manages
+     * the provider's underlying data repository.
+     */
+    private static class DatabaseHelper extends SQLiteOpenHelper {
+        DatabaseHelper(Context context){
+            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        }
+
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            db.execSQL(CREATE_DB_TABLE);
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            db.execSQL("DROP TABLE IF EXISTS " +  MESSAGES_TABLE_NAME);
+            onCreate(db);
+        }
+    }
+
+
+    @Override
+    public boolean onCreate() {
+        db = new DatabaseHelper(getContext()).getWritableDatabase();
+        return (db == null);
+    }
+
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         // Implement this to handle requests to delete one or more rows.
@@ -52,12 +82,6 @@ public class MyContentProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues values) {
         // TODO: Implement this to handle requests to insert a new row.
         throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
-    public boolean onCreate() {
-        // TODO: Implement this to initialize your content provider on startup.
-        return false;
     }
 
     @Override
