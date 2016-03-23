@@ -9,6 +9,9 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+/**
+ * A BaseAdapter that visualizes the content of an array of Strings
+ */
 public class MyCustomAdapter extends BaseAdapter {
     private ArrayList<String> mListItems;
     private LayoutInflater mLayoutInflater;

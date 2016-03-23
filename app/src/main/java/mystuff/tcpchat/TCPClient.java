@@ -5,6 +5,9 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 
+/**
+ * A class that creates a tcp socket to the desired ip and port and communicates through it with String messages.
+ */
 public class TCPClient {
 
     private String serverMessage;
@@ -41,6 +44,9 @@ public class TCPClient {
         }
     }
 
+    /**
+     * Closes the output stream and stops the listening on the socket
+     */
     public void stopClient(){
         mRun = false;
         out.flush();

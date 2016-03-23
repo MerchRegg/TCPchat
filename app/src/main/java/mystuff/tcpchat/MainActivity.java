@@ -22,6 +22,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        //array of Strings add to the View
         arrayList = new ArrayList<String>();
 
         final EditText editText = (EditText) findViewById(R.id.editText);
@@ -63,6 +64,9 @@ public class MainActivity extends Activity {
         mTcpClient.stopClient();
     }
 
+    /**
+     * AsyncTask that starts a new TCPClient
+     */
     public class clientTask extends AsyncTask<String,String,TCPClient> {
 
         @Override
