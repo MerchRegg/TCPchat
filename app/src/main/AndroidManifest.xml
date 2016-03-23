@@ -23,6 +23,11 @@
             android:name=".provider.MyContentProvider"
             android:authorities="mystuff.tcpchat.provider.MyContentProvider"
             android:enabled="true"
+            android:exported="true" />
+        <provider
+            android:name=".provider.StringsProvider"
+            android:authorities="mystuff.tcpchat.provider.StringsProvider"
+            android:enabled="true"
             android:exported="true"></provider>
     </application>
 
