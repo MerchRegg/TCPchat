@@ -11,7 +11,7 @@ import java.util.Date;
 
 public class MyDbHelper extends SQLiteOpenHelper {
 
-    private static final String MESSAGES_TABLE = "messages";
+    public static final String MESSAGES_TABLE = "messages";
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_TEXT = "_text";
     public static final String COLUMN_SENDER = "_sender";
