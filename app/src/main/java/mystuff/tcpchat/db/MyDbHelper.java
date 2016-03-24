@@ -1,5 +1,6 @@
 package mystuff.tcpchat.db;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -7,6 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.Date;
+
+import mystuff.tcpchat.provider.ChatMessageProvider;
 
 
 public class MyDbHelper extends SQLiteOpenHelper {
@@ -18,8 +21,11 @@ public class MyDbHelper extends SQLiteOpenHelper {
     public static final String COLUMN_RECEIVER = "_receiver";
     public static final String COLUMN_DATE = "_date";
 
+    private ContentResolver contentResolver;
+
     public MyDbHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
+        contentResolver = context.getContentResolver();
     }
 
     @Override
@@ -43,12 +49,14 @@ public class MyDbHelper extends SQLiteOpenHelper {
     public void addChatMessage(ChatMessage message){
         ContentValues values = new ContentValues();
         values.put(COLUMN_TEXT, message.get_text());
-        values.put(COLUMN_DATE, message.get_time().toString());
+        values.put(COLUMN_DATE, message.get_time());
         values.put(COLUMN_SENDER, message.get_sender());
         values.put(COLUMN_RECEIVER, message.get_receiver());
+        contentResolver.insert(ChatMessageProvider.CONTENT_URI, values);
     }
 
     public ChatMessage findChatMessage(int id){
+        /* BEFORE THE UPDATE
         String query = "Select * FROM " + MESSAGES_TABLE + " WHERE " + COLUMN_ID + " =  \"" + id + "\"";
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -66,6 +74,71 @@ public class MyDbHelper extends SQLiteOpenHelper {
         }
         db.close();
         return message;
+        */
+        String[] projection = {COLUMN_ID, COLUMN_TEXT, COLUMN_RECEIVER, COLUMN_SENDER, COLUMN_DATE };
+
+        String selection = "id = \"" + id + "\"";
+
+        Cursor cursor = contentResolver.query(
+                ChatMessageProvider.CONTENT_URI,
+                projection,
+                selection,
+                null,
+                null);
+
+        ChatMessage message;
+
+        if (cursor.moveToFirst()) {
+            cursor.moveToFirst();
+            message = new ChatMessage(Integer.parseInt(cursor.getString(0)), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4));
+            cursor.close();
+        } else {
+            message = null;
+        }
+        return message;
+    }
+
+    public ChatMessage findChatMessage(String date){
+        /* BEFORE THE UPDATE
+        String query = "Select * FROM " + MESSAGES_TABLE + " WHERE " + COLUMN_ID + " =  \"" + id + "\"";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor cursor = db.rawQuery(query, null);
+
+        ChatMessage message;
+
+        if (cursor.moveToFirst()) {
+            cursor.moveToFirst();
+            message = new ChatMessage(Integer.parseInt(cursor.getString(0)), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4));
+            cursor.close();
+        } else {
+            message = null;
+        }
+        db.close();
+        return message;
+        */
+        String[] projection = {COLUMN_ID, COLUMN_TEXT, COLUMN_RECEIVER, COLUMN_SENDER, COLUMN_DATE };
+
+        String selection = "date = \"" + date + "\"";
+
+        Cursor cursor = contentResolver.query(
+                ChatMessageProvider.CONTENT_URI,
+                projection,
+                selection,
+                null,
+                null);
+
+        ChatMessage message;
+
+        if (cursor.moveToFirst()) {
+            cursor.moveToFirst();
+            message = new ChatMessage(Integer.parseInt(cursor.getString(0)), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4));
+            cursor.close();
+        } else {
+            message = null;
+        }
+        return message;
     }
 
     /**
@@ -74,6 +147,7 @@ public class MyDbHelper extends SQLiteOpenHelper {
      * @return boolean, true if succesful, false if no message of specified id was found
      */
     public boolean deleteMessage(int id){
+        /*
         boolean result = false;
 
         String query = "Select * FROM " + MESSAGES_TABLE + " WHERE " + COLUMN_ID + " =  \"" + id + "\"";
@@ -93,6 +167,18 @@ public class MyDbHelper extends SQLiteOpenHelper {
         }
         db.close();
         return result;
+        */
+
+        boolean result = false;
+
+        String selection = "id = \"" + id + "\"";
+
+        int rowsDeleted = contentResolver.delete(ChatMessageProvider.CONTENT_URI, selection, null);
+
+        if (rowsDeleted > 0)
+            result = true;
+
+        return result;
     }
 
     /**
@@ -103,24 +189,14 @@ public class MyDbHelper extends SQLiteOpenHelper {
     public boolean deleteMessage(String date){
         boolean result = false;
 
-        String query = "Select * FROM " + MESSAGES_TABLE + " WHERE " + COLUMN_DATE + " =  \"" + date + "\"";
+        String selection = "date = \"" + date + "\"";
 
-        SQLiteDatabase db = this.getWritableDatabase();
+        int rowsDeleted = contentResolver.delete(ChatMessageProvider.CONTENT_URI, selection, null);
 
-        Cursor cursor = db.rawQuery(query, null);
-
-        ChatMessage message = new ChatMessage();
-
-        if (cursor.moveToFirst()) {
-            //message.setID(Integer.parseInt(cursor.getString(0)));
-            //db.delete(MESSAGES_TABLE, COLUMN_ID + " = ?", new String[] { String.valueOf(message.get_id()) });
-            db.delete(MESSAGES_TABLE, COLUMN_ID + " = " + date, null);
-            cursor.close();
+        if (rowsDeleted > 0)
             result = true;
-        }
-        db.close();
+
         return result;
     }
-
 
 }
