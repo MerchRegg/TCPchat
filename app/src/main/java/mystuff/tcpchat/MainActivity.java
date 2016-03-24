@@ -3,18 +3,28 @@ package mystuff.tcpchat;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Date;
+
+import mystuff.tcpchat.db.ChatMessage;
+import mystuff.tcpchat.db.MyDbHelper;
 
 public class MainActivity extends Activity {
     private ListView mList;
     private ArrayList<String> arrayList;
     private MyCustomAdapter mAdapter;
     private TCPClient mTcpClient;
+
+    private static final String DATABASE_NAME = "chatmessagesDB.db";
+    private static String sender = "Client";
+    private static String receiver = "Server";
+    private MyDbHelper dbHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -33,6 +43,9 @@ public class MainActivity extends Activity {
         mAdapter = new MyCustomAdapter(this, arrayList);
         mList.setAdapter(mAdapter);
 
+        //create database helper
+        dbHelper = new MyDbHelper(this, DATABASE_NAME, null, 1);
+
         //connect to server
         new clientTask().execute("");
 
@@ -41,6 +54,8 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
 
                 String message = editText.getText().toString();
+
+                sendMessage(message);
 
                 //add the text in the arrayList
                 arrayList.add("c: " + message);
@@ -78,6 +93,7 @@ public class MainActivity extends Activity {
                 public void messageReceived(String message) {
                     //this method calls the onProgressUpdate
                     publishProgress(message);
+                    printDataBase();
                 }
             });
             mTcpClient.run();
@@ -94,6 +110,27 @@ public class MainActivity extends Activity {
             // notify the adapter that the data set has changed. This means that new message received
             // from server was added to the list
             mAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void sendMessage(String text){
+        ChatMessage message = new ChatMessage(text, sender, receiver, new Date().toString());
+        dbHelper.addChatMessage(message);
+
+
+        //add the text in the arrayList
+        arrayList.add("c: " + text);
+
+        //sends the message to the server
+        if (mTcpClient != null) {
+            mTcpClient.sendMessage(text);
+        }
+    }
+
+    private void printDataBase(){
+        ArrayList<ChatMessage> messages = dbHelper.getAllMessages();
+        for(ChatMessage m : messages){
+            Log.d("main", m.toString());
         }
     }
 }

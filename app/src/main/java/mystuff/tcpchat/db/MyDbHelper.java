@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import mystuff.tcpchat.provider.ChatMessageProvider;
@@ -20,6 +21,7 @@ public class MyDbHelper extends SQLiteOpenHelper {
     public static final String COLUMN_SENDER = "_sender";
     public static final String COLUMN_RECEIVER = "_receiver";
     public static final String COLUMN_DATE = "_date";
+    private static int count;
 
     private ContentResolver contentResolver;
 
@@ -32,12 +34,13 @@ public class MyDbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String CREATE_PRODUCTS_TABLE = "CREATE TABLE " +
                 MESSAGES_TABLE + "("
-                + COLUMN_ID + " INTEGER PRIMARY KEY,"
+                + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + COLUMN_TEXT + " TEXT,"
                 + COLUMN_SENDER + " TEXT,"
                 + COLUMN_RECEIVER + " TEXT,"
-                + COLUMN_DATE + "DATE" + ")";
+                + COLUMN_DATE + "TEXT" + ")";
         db.execSQL(CREATE_PRODUCTS_TABLE);
+        count = 0;
     }
 
     @Override
@@ -53,6 +56,7 @@ public class MyDbHelper extends SQLiteOpenHelper {
         values.put(COLUMN_SENDER, message.get_sender());
         values.put(COLUMN_RECEIVER, message.get_receiver());
         contentResolver.insert(ChatMessageProvider.CONTENT_URI, values);
+        count++;
     }
 
     public ChatMessage findChatMessage(int id){
@@ -141,6 +145,28 @@ public class MyDbHelper extends SQLiteOpenHelper {
         return message;
     }
 
+    public ArrayList<ChatMessage> getAllMessages(){
+        ArrayList<ChatMessage> messages = new ArrayList<>();
+
+        String[] projection = {COLUMN_ID, COLUMN_TEXT, COLUMN_RECEIVER, COLUMN_SENDER, COLUMN_DATE };
+
+        String selection = "";
+
+        Cursor cursor = contentResolver.query(
+                ChatMessageProvider.CONTENT_URI,
+                projection,
+                selection,
+                null,
+                null);
+
+        while (cursor.moveToFirst()) {
+            cursor.moveToFirst();
+            messages.add(new ChatMessage(Integer.parseInt(cursor.getString(0)), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4)));
+            cursor.close();
+        }
+        return messages;
+    }
+
     /**
      * Delete a message, if present, with specified id
      * @param id String, the id of the ChatMessage to be deleted
@@ -175,8 +201,10 @@ public class MyDbHelper extends SQLiteOpenHelper {
 
         int rowsDeleted = contentResolver.delete(ChatMessageProvider.CONTENT_URI, selection, null);
 
-        if (rowsDeleted > 0)
+        if (rowsDeleted > 0) {
+            count--;
             result = true;
+        }
 
         return result;
     }
@@ -193,10 +221,20 @@ public class MyDbHelper extends SQLiteOpenHelper {
 
         int rowsDeleted = contentResolver.delete(ChatMessageProvider.CONTENT_URI, selection, null);
 
-        if (rowsDeleted > 0)
+        if (rowsDeleted > 0) {
+            count--;
             result = true;
+        }
 
         return result;
+    }
+
+    /**
+     * Get the number of elements (rows) in the MESSAGES_TABLE
+     * @return int, the count
+     */
+    public int getCount(){
+        return count;
     }
 
 }

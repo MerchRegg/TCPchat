@@ -64,6 +64,5 @@ public class MyCustomAdapter extends BaseAdapter {
 
         //this method must return the view corresponding to the data at the specified position.
         return view;
-
     }
 }
