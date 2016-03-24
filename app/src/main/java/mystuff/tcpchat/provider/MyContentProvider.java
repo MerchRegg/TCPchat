@@ -15,10 +15,21 @@ import android.text.TextUtils;
 import java.sql.SQLException;
 import java.util.HashMap;
 
+import mystuff.tcpchat.db.MyDbHelper;
+
 public class MyContentProvider extends ContentProvider {
 
-    static final String PROVIDER_NAME = "mystuff.tcpchat.provider.AllMessages";
-    static final String URL = "content://" + PROVIDER_NAME + "/messages";
+    /**
+     * Database specific constant declarations
+     */
+    private SQLiteDatabase db;
+
+    private static final int DATABASE_VERSION = 1;
+    private static final String DATABASE_NAME = "chatmessagesDB.db";
+    static final String MESSAGES_TABLE_NAME = "messages";
+
+    static final String AUTHORITY = "mystuff.tcpchat.provider.MyContentProvider";
+    static final String URL = "content://" + AUTHORITY + "/" + MESSAGES_TABLE_NAME;
     static final Uri CONTENT_URI = Uri.parse(URL);
 
     static final String _ID = "_id";
@@ -30,56 +41,29 @@ public class MyContentProvider extends ContentProvider {
 
     static final int MESSAGES = 1;
     static final int MESSAGE_ID = 2;
+    static final int MESSAGE_SENDER = 3;
+    static final int MESSAGE_RECEIVER = 4;
+    static final int MESSAGE_TIME = 5;
 
     static final UriMatcher uriMatcher;
     static{
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        uriMatcher.addURI(PROVIDER_NAME, "messages", MESSAGES);
-        uriMatcher.addURI(PROVIDER_NAME, "messages/#", MESSAGE_ID);
+        uriMatcher.addURI(AUTHORITY, MESSAGES_TABLE_NAME, MESSAGES);
+        uriMatcher.addURI(AUTHORITY, MESSAGES_TABLE_NAME + "/#", MESSAGE_ID);
+        uriMatcher.addURI(AUTHORITY, MESSAGES_TABLE_NAME + "/sender", MESSAGE_SENDER);
+        uriMatcher.addURI(AUTHORITY, MESSAGES_TABLE_NAME + "/receiver", MESSAGE_RECEIVER);
+        uriMatcher.addURI(AUTHORITY, MESSAGES_TABLE_NAME + "/time", MESSAGE_TIME);
     }
 
-    /**
-     * Database specific constant declarations
-     */
-    private SQLiteDatabase db;
-    static final String DATABASE_NAME = "AllMessages";
-    static final String MESSAGES_TABLE_NAME = "messages";
-    static final int DATABASE_VERSION = 1;
-    static final String CREATE_DB_TABLE =
-            " CREATE TABLE " + MESSAGES_TABLE_NAME +
-                    " (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    " name TEXT NOT NULL, " +
-                    " grade TEXT NOT NULL);";
 
-    /**
-     * Helper class that actually creates and manages
-     * the provider's underlying data repository.
-     */
-    private static class DatabaseHelper extends SQLiteOpenHelper {
-        DatabaseHelper(Context context){
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        }
-
-        @Override
-        public void onCreate(SQLiteDatabase db)
-        {
-            db.execSQL(CREATE_DB_TABLE);
-        }
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            db.execSQL("DROP TABLE IF EXISTS " +  MESSAGES_TABLE_NAME);
-            onCreate(db);
-        }
-    }
 
     @Override
     public boolean onCreate() {
         Context context = getContext();
-        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        MyDbHelper dbHelper = new MyDbHelper(context, DATABASE_NAME, null, DATABASE_VERSION);
 
         /**
-         * Create a write able database which will trigger its
+         * Create a writable database which will trigger its
          * creation if it doesn't already exist.
          */
         db = dbHelper.getWritableDatabase();
