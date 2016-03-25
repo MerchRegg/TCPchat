@@ -52,9 +52,9 @@ public class MyDbHelper extends SQLiteOpenHelper {
     public void addChatMessage(ChatMessage message){
         ContentValues values = new ContentValues();
         values.put(COLUMN_TEXT, message.get_text());
-        values.put(COLUMN_DATE, message.get_time());
         values.put(COLUMN_SENDER, message.get_sender());
         values.put(COLUMN_RECEIVER, message.get_receiver());
+        //values.put(COLUMN_DATE, message.get_time());
         contentResolver.insert(ChatMessageProvider.CONTENT_URI, values);
         count++;
     }

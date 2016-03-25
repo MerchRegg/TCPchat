@@ -11,10 +11,13 @@ public class ServerBoard extends JFrame {
     private JTextField message;
     private JButton startServer;
     private TCPServer mServer;
+    private String ip;
 
-    public ServerBoard() {
+    public ServerBoard(String ip) {
 
         super("ServerBoard");
+
+        this.ip = ip;
 
         JPanel panelFields = new JPanel();
         panelFields.setLayout(new BoxLayout(panelFields,BoxLayout.X_AXIS));
@@ -43,7 +46,7 @@ public class ServerBoard extends JFrame {
             }
         });
 
-        startServer = new JButton("Start");
+        startServer = new JButton("Start " + ip);
         startServer.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

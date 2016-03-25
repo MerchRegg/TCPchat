@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 public class TCPServer extends Thread {
 
     public static final int SERVERPORT = 4444;
+    public static final String ip = NetworkUtils.getIPAddress(true);
     private boolean running = false;
     private PrintWriter mOut;
     private OnMessageReceived messageListener;
@@ -19,7 +20,7 @@ public class TCPServer extends Thread {
     public static void main(String[] args) {
 
         //opens the window where the messages will be received and sent
-        ServerBoard frame = new ServerBoard();
+        ServerBoard frame = new ServerBoard(ip);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
@@ -52,7 +53,7 @@ public class TCPServer extends Thread {
         running = true;
 
         try {
-            System.out.println("S: Connecting... IP:"+NetworkUtils.getIPAddress(true));
+            System.out.println("S: Connecting... IP:"+ ip);
 
             //create a server socket. A server socket waits for requests to come in over the network.
             ServerSocket serverSocket = new ServerSocket(SERVERPORT);
