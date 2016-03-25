@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,6 +40,7 @@ public class MyDbHelper extends SQLiteOpenHelper {
                 + COLUMN_SENDER + " TEXT,"
                 + COLUMN_RECEIVER + " TEXT,"
                 + COLUMN_DATE + "TEXT" + ")";
+        System.out.println("DBHELPER: " + CREATE_PRODUCTS_TABLE);
         db.execSQL(CREATE_PRODUCTS_TABLE);
         count = 0;
     }

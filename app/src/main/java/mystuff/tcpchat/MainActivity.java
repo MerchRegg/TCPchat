@@ -45,6 +45,15 @@ public class MainActivity extends Activity {
 
         //create database helper
         dbHelper = new MyDbHelper(this, DATABASE_NAME, null, 1);
+        Log.d("main", "created db");
+        //test database helper
+        ChatMessage testMessage = new ChatMessage("pippo", "client", "server", new Date().toString());
+        dbHelper.addChatMessage(testMessage);
+        Log.d("main", "sent message: " + testMessage.toString());
+        testMessage = dbHelper.findChatMessage(-1);
+        Log.d("main", "received message: "+ testMessage.toString());
+        printDataBase();
+
 
         //connect to server
         new clientTask().execute("");
@@ -129,6 +138,7 @@ public class MainActivity extends Activity {
 
     private void printDataBase(){
         ArrayList<ChatMessage> messages = dbHelper.getAllMessages();
+        Log.d("main", "Printing database.");
         for(ChatMessage m : messages){
             Log.d("main", m.toString());
         }

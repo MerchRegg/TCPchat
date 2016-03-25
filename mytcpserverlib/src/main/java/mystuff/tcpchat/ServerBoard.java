@@ -15,7 +15,7 @@ public class ServerBoard extends JFrame {
 
     public ServerBoard(String ip) {
 
-        super("ServerBoard");
+        super("ServerBoard " + ip);
 
         this.ip = ip;
 
@@ -46,7 +46,7 @@ public class ServerBoard extends JFrame {
             }
         });
 
-        startServer = new JButton("Start " + ip);
+        startServer = new JButton("Start");
         startServer.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
