@@ -2,12 +2,14 @@ package mystuff.tcpchat.database;
 
 
 public class ChatMessage {
+    private int id;
     private String text;
     private String date;
     private String sender;
     private String receiver;
 
-    ChatMessage(String text, String sender, String receiver, String date){
+    public ChatMessage(int id, String text, String sender, String receiver, String date){
+        this.id = id;
         this.text = text;
         this.sender = sender;
         this.receiver = receiver;
@@ -28,5 +30,9 @@ public class ChatMessage {
 
     String getReceiver(){
         return this.receiver;
+    }
+
+    public String toString(){
+        return "<ID:" + id + "text:'" + text + "' sender:'" + sender + "' receiver:'" + "' date:" + date + ">";
     }
 }

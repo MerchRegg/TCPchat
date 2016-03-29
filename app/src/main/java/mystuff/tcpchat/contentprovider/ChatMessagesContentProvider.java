@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -17,6 +18,8 @@ import mystuff.tcpchat.database.ChatMessageDbHelper;
 import mystuff.tcpchat.database.MessagesTable;
 
 public class ChatMessagesContentProvider extends ContentProvider {
+    private static final String TAG = "contentprovider";
+
     //database
     private ChatMessageDbHelper databaseHelper;
 
@@ -58,19 +61,22 @@ public class ChatMessagesContentProvider extends ContentProvider {
         queryBuilder.setTables(MessagesTable.TABLE_MESSAGES);
 
         int uriType = sURIMatcher.match(uri);
+        Log.d(TAG, "PROVIDER--> query   uritype:" + uriType);
         switch (uriType) {
             case MESSAGES:
                 break;
-            case MESSAGE_SENDER:
+            case MESSAGE_SENDER: {
                 // adding the ID to the original query
                 queryBuilder.appendWhere(MessagesTable.COLUMN_SENDER + "="
                         + uri.getLastPathSegment());
                 break;
-            case MESSAGE_RECEIVER:
+            }
+            case MESSAGE_RECEIVER: {
                 // adding the ID to the original query
                 queryBuilder.appendWhere(MessagesTable.COLUMN_RECEIVER + "="
                         + uri.getLastPathSegment());
                 break;
+            }
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
