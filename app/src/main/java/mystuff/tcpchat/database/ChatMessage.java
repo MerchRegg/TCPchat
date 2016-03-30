@@ -16,23 +16,23 @@ public class ChatMessage {
         this.date = date;
     }
 
-    String getText(){
+    public String getText(){
         return this.text;
     }
 
-    String getDate(){
+    public String getDate(){
         return this.date;
     }
 
-    String getSender(){
+    public String getSender(){
         return this.sender;
     }
 
-    String getReceiver(){
+    public String getReceiver(){
         return this.receiver;
     }
 
     public String toString(){
-        return "<ID:" + id + "text:'" + text + "' sender:'" + sender + "' receiver:'" + "' date:" + date + ">";
+        return "<ID:'" + id + "' text:'" + text + "' sender:'" + sender + "' receiver:'" + receiver + "' date:'" + date + "'>";
     }
 }

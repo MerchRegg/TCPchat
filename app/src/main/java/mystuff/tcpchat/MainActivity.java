@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
 
                 //sends the message to the server
                 if (mTcpClient != null) {
-                    putMessage(message, "Client", "Server", new Date().toString());
+                    putMessage(new ChatMessage(-1, message, "Client", "Server", new Date().toString()));
                     mTcpClient.sendMessage(message);
                 }
 
@@ -107,14 +107,15 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void putMessage(String text, String sender, String receiver, String date){
-        Log.d(TAG, "put message: " + text);
+    private void putMessage(ChatMessage message){
+        Log.d(TAG, "put message: " + message);
         ContentValues chatMessageValues = new ContentValues();
-        chatMessageValues.put(MessagesTable.COLUMN_TEXT, text);
-        chatMessageValues.put(MessagesTable.COLUMN_SENDER, sender);
-        chatMessageValues.put(MessagesTable.COLUMN_RECEIVER, receiver);
-        chatMessageValues.put(MessagesTable.COLUMN_DATE, date);
+        chatMessageValues.put(MessagesTable.COLUMN_TEXT, message.getText());
+        chatMessageValues.put(MessagesTable.COLUMN_SENDER, message.getSender());
+        chatMessageValues.put(MessagesTable.COLUMN_RECEIVER, message.getReceiver());
+        chatMessageValues.put(MessagesTable.COLUMN_DATE, message.getDate());
         Log.d(TAG, "put in: " + getContentResolver().insert(ChatMessagesContentProvider.CONTENT_URI, chatMessageValues).toString());
+        Log.d(TAG, "message: " + message);
         printDatabase();
     }
 
@@ -126,8 +127,13 @@ public class MainActivity extends Activity {
         }
         cursor.moveToFirst();
         ChatMessage m;
-        while(cursor.isAfterLast()){
-            m = new ChatMessage(Integer.parseInt(cursor.getString(0)), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4));
+        while(!cursor.isAfterLast()){
+            m = new ChatMessage(
+                    Integer.parseInt(cursor.getString(0)),
+                    cursor.getString(cursor.getColumnIndex(MessagesTable.COLUMN_TEXT)),
+                    cursor.getString(cursor.getColumnIndex(MessagesTable.COLUMN_SENDER)),
+                    cursor.getString(cursor.getColumnIndex(MessagesTable.COLUMN_RECEIVER)),
+                    cursor.getString(cursor.getColumnIndex(MessagesTable.COLUMN_DATE)));
             Log.d(TAG, "DATABASEPRINT: "+ m.toString());
             cursor.moveToNext();
         }

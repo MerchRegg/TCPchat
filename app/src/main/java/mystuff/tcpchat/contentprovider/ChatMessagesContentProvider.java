@@ -86,6 +86,12 @@ public class ChatMessagesContentProvider extends ContentProvider {
         // make sure that potential listeners are getting notified
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
 
+        /**
+         * just for testing
+        cursor.moveToFirst();
+        Log.d(TAG, "first is: " + cursor.getString(0) + " "+ cursor.getString(1) + " "+ cursor.isAfterLast() + " ");
+         */
+
         return cursor;
     }
 
