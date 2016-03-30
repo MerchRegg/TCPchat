@@ -35,4 +35,8 @@ public class ChatMessage {
     public String toString(){
         return "<ID:'" + id + "' text:'" + text + "' sender:'" + sender + "' receiver:'" + receiver + "' date:'" + date + "'>";
     }
+
+    public String display(){
+        return sender + ": " + text + "\n\n\t ("+date+")";
+    }
 }

@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -21,7 +22,7 @@ import mystuff.tcpchat.database.MessagesTable;
 public class MainActivity extends Activity {
     private ListView mList;
     private ArrayList<String> arrayList;
-    private MyCustomAdapter mAdapter;
+    private BaseAdapter mAdapter;
     private TCPClient mTcpClient;
 
     private final String TAG = "main";
@@ -39,7 +40,10 @@ public class MainActivity extends Activity {
 
         //set the adapter for the list
         mList = (ListView)findViewById(R.id.list);
+        /*
         mAdapter = new MyCustomAdapter(this, arrayList);
+        */
+        mAdapter = new ChatMessageDbAdapter(this);
         mList.setAdapter(mAdapter);
 
         //connect to server
@@ -53,10 +57,10 @@ public class MainActivity extends Activity {
 
                 //add the text in the arrayList
                 arrayList.add("c: " + message);
+                putMessage(new ChatMessage(-1, message, "Client", "Server", new Date().toString()));
 
                 //sends the message to the server
                 if (mTcpClient != null) {
-                    putMessage(new ChatMessage(-1, message, "Client", "Server", new Date().toString()));
                     mTcpClient.sendMessage(message);
                 }
 
@@ -101,6 +105,7 @@ public class MainActivity extends Activity {
 
             //in the arrayList we add the messaged received from server
             arrayList.add(values[0]);
+            putMessage(new ChatMessage(-1, values[0], "Server", "Client", new Date().toString()));
             // notify the adapter that the data set has changed. This means that new message received
             // from server was added to the list
             mAdapter.notifyDataSetChanged();
@@ -114,9 +119,9 @@ public class MainActivity extends Activity {
         chatMessageValues.put(MessagesTable.COLUMN_SENDER, message.getSender());
         chatMessageValues.put(MessagesTable.COLUMN_RECEIVER, message.getReceiver());
         chatMessageValues.put(MessagesTable.COLUMN_DATE, message.getDate());
-        Log.d(TAG, "put in: " + getContentResolver().insert(ChatMessagesContentProvider.CONTENT_URI, chatMessageValues).toString());
-        Log.d(TAG, "message: " + message);
-        printDatabase();
+        //Log.d(TAG, "put in: " + getContentResolver().insert(ChatMessagesContentProvider.CONTENT_URI, chatMessageValues).toString());
+        //Log.d(TAG, "message: " + message);
+        //printDatabase();
     }
 
     private void printDatabase(){
