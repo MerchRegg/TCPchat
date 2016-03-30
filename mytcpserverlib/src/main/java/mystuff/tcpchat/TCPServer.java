@@ -11,7 +11,7 @@ import javax.swing.JFrame;
  */
 public class TCPServer extends Thread {
 
-    public static final int SERVERPORT = 4444;
+    public static final int SERVERPORT = 6789;
     private boolean running = false;
     private PrintWriter mOut;
     private OnMessageReceived messageListener;
@@ -19,7 +19,7 @@ public class TCPServer extends Thread {
     public static void main(String[] args) {
 
         //opens the window where the messages will be received and sent
-        ServerBoard frame = new ServerBoard();
+        ServerBoard frame = new ServerBoard(NetworkUtils.getIPAddress(true) + ":" + SERVERPORT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);

@@ -2,7 +2,10 @@ package mystuff.tcpchat;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,6 +14,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,6 +51,7 @@ public class MainActivity extends Activity {
         mList.setAdapter(mAdapter);
 
         //connect to server
+        checkConnectivity();
         new clientTask().execute("");
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
@@ -103,6 +108,7 @@ public class MainActivity extends Activity {
         protected void onProgressUpdate(String[] values) {
             super.onProgressUpdate(values);
 
+            Log.d(TAG, "Received message: " + values[0]);
             //in the arrayList we add the messaged received from server
             arrayList.add(values[0]);
             putMessage(new ChatMessage(-1, values[0], "Server", "Client", new Date().toString()));
@@ -119,9 +125,9 @@ public class MainActivity extends Activity {
         chatMessageValues.put(MessagesTable.COLUMN_SENDER, message.getSender());
         chatMessageValues.put(MessagesTable.COLUMN_RECEIVER, message.getReceiver());
         chatMessageValues.put(MessagesTable.COLUMN_DATE, message.getDate());
-        //Log.d(TAG, "put in: " + getContentResolver().insert(ChatMessagesContentProvider.CONTENT_URI, chatMessageValues).toString());
-        //Log.d(TAG, "message: " + message);
-        //printDatabase();
+        Log.d(TAG, "put in: " + getContentResolver().insert(ChatMessagesContentProvider.CONTENT_URI, chatMessageValues).toString());
+        Log.d(TAG, "message: " + message);
+        printDatabase();
     }
 
     private void printDatabase(){
@@ -143,5 +149,21 @@ public class MainActivity extends Activity {
             cursor.moveToNext();
         }
         Log.d(TAG, "database printed.");
+    }
+
+    private void checkConnectivity(){
+        ConnectivityManager connectivityManager = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        if (networkInfo != null && networkInfo.isConnected() && networkInfo.isAvailable())
+        {
+            Toast.makeText(this, "There is an active network connection!", Toast.LENGTH_LONG).show();
+        }
+        else
+        {
+            // PROMPT USER THAT NETWORK IS DISCONNECTED
+
+            Toast.makeText(this, "ERROR: There is no active network connection!", Toast.LENGTH_LONG).show();
+        }
     }
 }

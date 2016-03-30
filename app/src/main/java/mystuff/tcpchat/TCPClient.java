@@ -2,6 +2,7 @@ package mystuff.tcpchat;
 
 import android.util.Log;
 import java.io.*;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -11,9 +12,9 @@ import java.net.Socket;
 public class TCPClient {
 
     private String serverMessage;
-    //public static String SERVERIP = "192.168.0.101"; //your computer IP address
-    public static String SERVERIP = "172.16.147.144";
-    public static int SERVERPORT = 4444;
+    public static String SERVERIP = "192.168.0.101"; //your computer IP address
+    //public static String SERVERIP = "172.16.147.144";
+    public static int SERVERPORT = 6789;
     private MessageReceivedListener mMessageListener = null;
     private boolean mRun = false;
 
@@ -59,12 +60,25 @@ public class TCPClient {
 
         try {
             //server's IP
-            InetAddress serverAddr = InetAddress.getByName(SERVERIP);
+            //InetAddress serverAddr = InetAddress.getByName(SERVERIP);
 
             Log.e("TCP Client", "C: Connecting... SERVERIP:"+SERVERIP+" PORT:"+SERVERPORT);
 
             //create a socket to make the connection with the server
-            Socket socket = new Socket(serverAddr, SERVERPORT);
+            int attempt = 3;
+            Socket socket = null;
+            while(attempt > 0) {
+                try {
+                    socket = new Socket(SERVERIP, SERVERPORT);
+                    attempt = -1;
+                } catch (ConnectException ex) {
+                    ex.printStackTrace();
+                    attempt--;
+                }
+            }
+            if(socket == null){
+                throw new ConnectException("Failed all attempts to connect!");
+            }
 
             Log.e("TCP Client", "C: Connected! SERVERIP:"+SERVERIP+" PORT:"+SERVERPORT);
 

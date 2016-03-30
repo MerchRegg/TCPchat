@@ -19,6 +19,7 @@ import mystuff.tcpchat.database.MessagesTable;
 public class ChatMessageDbAdapter  extends BaseAdapter{
     private Context context;
     private LayoutInflater layoutInflater;
+    private Cursor cursor;
     private static String TAG = "dbadapter";
 
     public ChatMessageDbAdapter(Context context){
@@ -29,14 +30,14 @@ public class ChatMessageDbAdapter  extends BaseAdapter{
 
     @Override
     public int getCount() {
-        Cursor cursor = context.getContentResolver().query(ChatMessagesContentProvider.CONTENT_URI, null, null, null, null);
+        cursor = context.getContentResolver().query(ChatMessagesContentProvider.CONTENT_URI, null, null, null, null);
         Log.d(TAG, "Got count: " + cursor.getCount());
         return (cursor == null) ? -1 : cursor.getCount();
     }
 
     @Override
     public Object getItem(int position) {
-        Cursor cursor = context.getContentResolver().query(ChatMessagesContentProvider.CONTENT_URI, null, null, null, null);
+        cursor = context.getContentResolver().query(ChatMessagesContentProvider.CONTENT_URI, null, null, null, null);
         Log.d(TAG, "Got item at position " + position);
         if(cursor != null && cursor.moveToPosition(position)){
             return new ChatMessage(
@@ -55,7 +56,7 @@ public class ChatMessageDbAdapter  extends BaseAdapter{
 
     @Override
     public long getItemId(int position) {
-        Cursor cursor = context.getContentResolver().query(ChatMessagesContentProvider.CONTENT_URI, null, null, null, null);
+        cursor = context.getContentResolver().query(ChatMessagesContentProvider.CONTENT_URI, null, null, null, null);
         Log.d(TAG, "Got item at position " + position);
         if(cursor != null && cursor.moveToPosition(position)){
             return Integer.parseInt(cursor.getString(0));

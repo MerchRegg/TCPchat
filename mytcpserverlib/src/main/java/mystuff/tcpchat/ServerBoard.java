@@ -12,9 +12,13 @@ public class ServerBoard extends JFrame {
     private JButton startServer;
     private TCPServer mServer;
 
-    public ServerBoard() {
+    public ServerBoard(){
+        this("");
+    }
 
-        super("ServerBoard");
+    public ServerBoard(String ip) {
+
+        super("ServerBoard" + " " + ip);
 
         JPanel panelFields = new JPanel();
         panelFields.setLayout(new BoxLayout(panelFields,BoxLayout.X_AXIS));
