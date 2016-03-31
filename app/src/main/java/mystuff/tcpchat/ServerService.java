@@ -19,7 +19,8 @@ import java.util.Date;
 public class ServerService extends IntentService {
     protected static final String BROADCAST = "ServerServiceBroadcast";
     private static final String TAG = "serverservice";
-    private int port = 6789;
+    private int port = 5678;
+    private String ip = NetworkUtils.getIPAddress(true);
     private String senderName = "unknown";
     private String receiverName = "unknown";
 
@@ -29,19 +30,29 @@ public class ServerService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        port = intent.getIntExtra("port", port);
+        Log.d(TAG, "Created server socket at " + ip + ":" + port);
+
+        Intent intentToSend = new Intent();
+        intentToSend.setAction(BROADCAST);
+
         if (intent != null) {
             try {
                 ServerSocket serverSocket = new ServerSocket(port);
-                Socket socket = serverSocket.accept();
 
+                //notify the main activity
+                sendBroadcast(intentToSend.putExtra("ServerStarted", true));
+                Log.d(TAG, "Notified start to main activity");
+
+                Socket socket = serverSocket.accept();
 
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
                 String received = "";
-                Intent intentToSend = new Intent();
                 while((received = in.readLine()) != null){
                     System.out.println(received);
                     Log.d(TAG, "received a message!");
+                    intentToSend = new Intent();
                     intentToSend.setAction(BROADCAST);
                     intentToSend.putExtra("text", received);
                     intentToSend.putExtra("sender", senderName);

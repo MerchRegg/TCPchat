@@ -19,7 +19,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 import mystuff.tcpchat.contentprovider.ChatMessagesContentProvider;
@@ -28,28 +27,24 @@ import mystuff.tcpchat.database.MessagesTable;
 
 public class MainActivity extends Activity {
     private ListView mList;
-    private ArrayList<String> arrayList;
     private BaseAdapter mAdapter;
     private TCPClient mTcpClient;
 
     private final String TAG = "main";
+    private int serverPort = 6789;
+    private int clientPort = 6789;
+    private String clientIp = NetworkUtils.getIPAddress(true);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        //array of Strings add to the View
-        arrayList = new ArrayList<String>();
-
         final EditText editText = (EditText) findViewById(R.id.editText);
         Button sendBtn = (Button)findViewById(R.id.send_button);
 
         //set the adapter for the list
         mList = (ListView)findViewById(R.id.list);
-        /*
-        mAdapter = new MyCustomAdapter(this, arrayList);
-        */
         mAdapter = new ChatMessageDbAdapter(this);
         mList.setAdapter(mAdapter);
 
@@ -57,11 +52,14 @@ public class MainActivity extends Activity {
         registerReceiver(new ServerBroadcastReceiver(), new IntentFilter(ServerService.BROADCAST));
 
         //start a server
-        startServerService();
+        startServerService(serverPort);
 
+        /**
+         * NOW this is done when received a broadcast message from the server that says it is started.
         //connect to server
         checkConnectivity();
         new clientTask().execute("");
+         */
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,7 +68,6 @@ public class MainActivity extends Activity {
                 String message = editText.getText().toString();
 
                 //add the text in the arrayList
-                arrayList.add("c: " + message);
                 putMessage(new ChatMessage(-1, message, "Client", "Server", new Date().toString()));
 
                 //sends the message to the server
@@ -86,8 +83,8 @@ public class MainActivity extends Activity {
 
     }
 
-    private void startServerService(){
-        startService(new Intent(this, ServerService.class));
+    private void startServerService(int port){
+        startService(new Intent(this, ServerService.class).putExtra("port", port));
     }
 
     private void stopServerService(){
@@ -117,7 +114,7 @@ public class MainActivity extends Activity {
                     publishProgress(message);
                 }
             });
-            mTcpClient.setServer(NetworkUtils.getIPAddress(true), 6789);
+            mTcpClient.setServer(clientIp, clientPort);
             mTcpClient.run();
 
             return null;
@@ -128,8 +125,7 @@ public class MainActivity extends Activity {
             super.onProgressUpdate(values);
 
             Log.d(TAG, "Received message: " + values[0]);
-            //in the arrayList we add the messaged received from server
-            arrayList.add(values[0]);
+            //add the messaged received from server
             putMessage(new ChatMessage(-1, values[0], "Server", "Client", new Date().toString()));
             // notify the adapter that the data set has changed. This means that new message received
             // from server was added to the list
@@ -188,16 +184,24 @@ public class MainActivity extends Activity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Bundle extra = intent.getExtras();
-            ChatMessage message = new ChatMessage(-1,
-                    extra.getString("text"),
-                    extra.getString("sender"),
-                    extra.getString("receiver"),
-                    extra.getString("date")
-            );
-            Log.d(TAG, "Received a broadcast message: " + message);
-            putMessage(message);
-            mAdapter.notifyDataSetChanged();
+            if(intent.getBooleanExtra("ServerStarted", false)){
+                Log.d(TAG, "Server has started, starting client");
+                //connect to server
+                checkConnectivity();
+                new clientTask().execute("");
+            }
+            else{
+                Bundle extra = intent.getExtras();
+                ChatMessage message = new ChatMessage(-1,
+                        extra.getString("text"),
+                        extra.getString("sender"),
+                        extra.getString("receiver"),
+                        extra.getString("date")
+                );
+                Log.d(TAG, "Received a broadcast message: " + message);
+                putMessage(message);
+                mAdapter.notifyDataSetChanged();
+            }
         }
     }
 }
