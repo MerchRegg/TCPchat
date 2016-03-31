@@ -29,16 +29,22 @@ public class MainActivity extends Activity {
     private ListView mList;
     private BaseAdapter mAdapter;
     private TCPClient mTcpClient;
+    private ServerBroadcastReceiver broadcastReceiver;
 
     private final String TAG = "main";
+    public static final int DATARETREIVE = 17;
+    public static final int DATAOK = 19;
+    public static final int DATAERROR = -1;
     private int serverPort = 6789;
     private int clientPort = 6789;
     private String clientIp = NetworkUtils.getIPAddress(true);
+    private boolean dataFetched = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
 
         final EditText editText = (EditText) findViewById(R.id.editText);
         Button sendBtn = (Button)findViewById(R.id.send_button);
@@ -49,10 +55,10 @@ public class MainActivity extends Activity {
         mList.setAdapter(mAdapter);
 
         //create broadcast receiver
-        registerReceiver(new ServerBroadcastReceiver(), new IntentFilter(ServerService.BROADCAST));
+        broadcastReceiver = new ServerBroadcastReceiver();
+        registerReceiver(broadcastReceiver, new IntentFilter(ServerService.BROADCAST));
 
-        //start a server
-        startServerService(serverPort);
+
 
         /**
          * NOW this is done when received a broadcast message from the server that says it is started.
@@ -83,6 +89,19 @@ public class MainActivity extends Activity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(dataFetched){
+            //start a server
+            startServerService(serverPort);
+        }
+        else{
+            Log.d(TAG, "Data not fetched yet, starting GetData");
+            startInsertDataActivity(DATARETREIVE);
+        }
+    }
+
     private void startServerService(int port){
         startService(new Intent(this, ServerService.class).putExtra("port", port));
     }
@@ -91,11 +110,16 @@ public class MainActivity extends Activity {
         stopService(new Intent(this, ServerService.class));
     }
 
+    /**
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mTcpClient.stopClient();
-        stopServerService();
+        unregisterReceiver(broadcastReceiver);
+        /**
+         mTcpClient.stopClient();
+         stopServerService();
+         */
     }
 
     /**
@@ -202,6 +226,24 @@ public class MainActivity extends Activity {
                 putMessage(message);
                 mAdapter.notifyDataSetChanged();
             }
+        }
+    }
+
+    private void startInsertDataActivity(int reqType){
+        Intent intent = new Intent(this, GetData.class);
+        Log.d(TAG, "Starting activity to get data");
+        startActivityForResult(intent, reqType);
+    }
+
+    @Override
+    protected void onActivityResult(int reqCode, int resCode, Intent data){
+        Log.d(TAG, "GetData activity has completed task req:" + reqCode + " res:" + resCode);
+        if(resCode == DATAOK){
+            clientIp = data.getStringExtra("clientIP");
+            clientPort = data.getIntExtra("clientPort", clientPort);
+            serverPort = data.getIntExtra("serverPort", serverPort);
+            Log.d(TAG, "Set data complete");
+            dataFetched = true;
         }
     }
 }

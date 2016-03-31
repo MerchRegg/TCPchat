@@ -28,7 +28,9 @@
 
         <service
             android:name=".ServerService"
-            android:exported="false"></service>
+            android:exported="false" />
+
+        <activity android:name=".GetData"></activity>
     </application>
 
 </manifest>
