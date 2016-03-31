@@ -61,7 +61,7 @@ public class ChatMessagesContentProvider extends ContentProvider {
         queryBuilder.setTables(MessagesTable.TABLE_MESSAGES);
 
         int uriType = sURIMatcher.match(uri);
-        Log.d(TAG, "called query()   uritype:" + uriType);
+        //Log.d(TAG, "called query()   uritype:" + uriType);
         switch (uriType) {
             case MESSAGES:
                 break;

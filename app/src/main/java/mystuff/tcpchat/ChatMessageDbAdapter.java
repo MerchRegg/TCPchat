@@ -31,14 +31,14 @@ public class ChatMessageDbAdapter  extends BaseAdapter{
     @Override
     public int getCount() {
         cursor = context.getContentResolver().query(ChatMessagesContentProvider.CONTENT_URI, null, null, null, null);
-        Log.d(TAG, "Got count: " + cursor.getCount());
+        //Log.d(TAG, "Got count: " + cursor.getCount());
         return (cursor == null) ? -1 : cursor.getCount();
     }
 
     @Override
     public Object getItem(int position) {
         cursor = context.getContentResolver().query(ChatMessagesContentProvider.CONTENT_URI, null, null, null, null);
-        Log.d(TAG, "Got item at position " + position);
+        //Log.d(TAG, "Got item at position " + position);
         if(cursor != null && cursor.moveToPosition(position)){
             return new ChatMessage(
                     Integer.parseInt(cursor.getString(0)),
@@ -57,7 +57,7 @@ public class ChatMessageDbAdapter  extends BaseAdapter{
     @Override
     public long getItemId(int position) {
         cursor = context.getContentResolver().query(ChatMessagesContentProvider.CONTENT_URI, null, null, null, null);
-        Log.d(TAG, "Got item at position " + position);
+        //Log.d(TAG, "Got item at position " + position);
         if(cursor != null && cursor.moveToPosition(position)){
             return Integer.parseInt(cursor.getString(0));
         }
@@ -70,7 +70,7 @@ public class ChatMessageDbAdapter  extends BaseAdapter{
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         //initialize the view
-        Log.d(TAG, "Initializing view");
+        //Log.d(TAG, "Initializing view");
         if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.list_item, null);
             Log.d(TAG, "Initialized view");
@@ -78,7 +78,7 @@ public class ChatMessageDbAdapter  extends BaseAdapter{
 
         //get the string item from the position "position" from array list to put it on the TextView
         ChatMessage message = (ChatMessage) getItem(position);
-        Log.d(TAG, "Got message " + message.toString());
+        //Log.d(TAG, "Got message " + message.toString());
         if (message != null) {
             TextView itemName = (TextView) convertView.findViewById(R.id.list_item_text_view);
             if (itemName != null) {

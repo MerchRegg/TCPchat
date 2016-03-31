@@ -1,9 +1,11 @@
 package mystuff.tcpchat;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -50,6 +52,9 @@ public class MainActivity extends Activity {
         */
         mAdapter = new ChatMessageDbAdapter(this);
         mList.setAdapter(mAdapter);
+
+        //create broadcast receiver
+        registerReceiver(new ServerBroadcastReceiver(), new IntentFilter(ServerService.BROADCAST));
 
         //start a server
         startServerService();
@@ -140,7 +145,6 @@ public class MainActivity extends Activity {
         chatMessageValues.put(MessagesTable.COLUMN_RECEIVER, message.getReceiver());
         chatMessageValues.put(MessagesTable.COLUMN_DATE, message.getDate());
         Log.d(TAG, "put in: " + getContentResolver().insert(ChatMessagesContentProvider.CONTENT_URI, chatMessageValues).toString());
-        Log.d(TAG, "message: " + message);
     }
 
     private void printDatabase(){
@@ -177,6 +181,23 @@ public class MainActivity extends Activity {
             // PROMPT USER THAT NETWORK IS DISCONNECTED
 
             Toast.makeText(this, "ERROR: There is no active network connection!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private class ServerBroadcastReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle extra = intent.getExtras();
+            ChatMessage message = new ChatMessage(-1,
+                    extra.getString("text"),
+                    extra.getString("sender"),
+                    extra.getString("receiver"),
+                    extra.getString("date")
+            );
+            Log.d(TAG, "Received a broadcast message: " + message);
+            putMessage(message);
+            mAdapter.notifyDataSetChanged();
         }
     }
 }
