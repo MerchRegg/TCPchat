@@ -31,6 +31,9 @@ public class MainActivity extends Activity {
     private TCPClient mTcpClient;
     private ServerBroadcastReceiver broadcastReceiver;
 
+    private String myName = "Agilulfo";
+    private String clientName;
+    private String serverName;
     private final String TAG = "main";
     public static final int DATARETREIVE = 17;
     public static final int DATAOK = 19;
@@ -137,8 +140,15 @@ public class MainActivity extends Activity {
                     //this method calls the onProgressUpdate
                     publishProgress(message);
                 }
+
+                @Override
+                public void receivedServerName(String name) {
+                    Log.d(TAG, "Received server name: " + name);
+                    serverName = name;
+                }
             });
             mTcpClient.setServer(clientIp, clientPort);
+            mTcpClient.setName(myName);
             mTcpClient.run();
 
             return null;
@@ -150,7 +160,7 @@ public class MainActivity extends Activity {
 
             Log.d(TAG, "Received message: " + values[0]);
             //add the messaged received from server
-            putMessage(new ChatMessage(-1, values[0], "Server", "Client", new Date().toString()));
+            putMessage(new ChatMessage(-1, values[0], serverName, myName, new Date().toString()));
             // notify the adapter that the data set has changed. This means that new message received
             // from server was added to the list
             mAdapter.notifyDataSetChanged();

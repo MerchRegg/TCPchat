@@ -34,7 +34,6 @@ public class GetData extends Activity {
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Fetching data");
                 fetchData(getIntent());
             }
         });
@@ -43,9 +42,14 @@ public class GetData extends Activity {
 
     private void fetchData(Intent intent){
         try{
+            Log.d(TAG, "Fetching data");
             String clientIP = clientIpView.getText().toString();
             int clientPort = Integer.parseInt(clientPortView.getText().toString());
             int serverPort = Integer.parseInt(serverPortView.getText().toString());
+            //FOR TESTING ONLY
+            clientIP = NetworkUtils.getIPAddress(true);
+            clientPort = 6789;
+            serverPort = 6789;
             if(!clientIP.equals("") && clientPort > 1024 && serverPort > 1024){
                 intent.putExtra("clientIP", clientIP);
                 intent.putExtra("clientPort", clientPort);
