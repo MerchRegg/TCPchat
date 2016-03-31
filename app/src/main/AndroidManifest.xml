@@ -24,7 +24,11 @@
             android:name=".contentprovider.ChatMessagesContentProvider"
             android:authorities="mystuff.tcpchat.contentprovider.ChatMessagesCOntentProvider"
             android:enabled="true"
-            android:exported="true"></provider>
+            android:exported="true" />
+
+        <service
+            android:name=".ServerService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

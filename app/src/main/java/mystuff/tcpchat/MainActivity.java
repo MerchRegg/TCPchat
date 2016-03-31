@@ -3,6 +3,7 @@ package mystuff.tcpchat;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -50,6 +51,9 @@ public class MainActivity extends Activity {
         mAdapter = new ChatMessageDbAdapter(this);
         mList.setAdapter(mAdapter);
 
+        //start a server
+        startServerService();
+
         //connect to server
         checkConnectivity();
         new clientTask().execute("");
@@ -77,10 +81,19 @@ public class MainActivity extends Activity {
 
     }
 
+    private void startServerService(){
+        startService(new Intent(this, ServerService.class));
+    }
+
+    private void stopServerService(){
+        stopService(new Intent(this, ServerService.class));
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mTcpClient.stopClient();
+        stopServerService();
     }
 
     /**
@@ -99,6 +112,7 @@ public class MainActivity extends Activity {
                     publishProgress(message);
                 }
             });
+            mTcpClient.setServer(NetworkUtils.getIPAddress(true), 6789);
             mTcpClient.run();
 
             return null;
@@ -127,7 +141,6 @@ public class MainActivity extends Activity {
         chatMessageValues.put(MessagesTable.COLUMN_DATE, message.getDate());
         Log.d(TAG, "put in: " + getContentResolver().insert(ChatMessagesContentProvider.CONTENT_URI, chatMessageValues).toString());
         Log.d(TAG, "message: " + message);
-        printDatabase();
     }
 
     private void printDatabase(){
