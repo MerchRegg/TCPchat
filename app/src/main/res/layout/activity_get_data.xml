@@ -11,6 +11,13 @@
     tools:context="mystuff.tcpchat.ClientServer">
 
     <EditText
+        android:id="@+id/myNameField"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:hint="Name" />
+
+    <EditText
         android:id="@+id/clientIpField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

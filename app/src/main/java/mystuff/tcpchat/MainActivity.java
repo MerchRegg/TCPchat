@@ -74,7 +74,7 @@ public class MainActivity extends Activity {
                 String message = editText.getText().toString();
 
                 //add the text in the arrayList
-                putMessage(new ChatMessage(-1, message, mTcpClient.getMyName(), serverName, new Date().toString()));
+                putMessage(new ChatMessage(-1, message, "C. " + myName, serverName, new Date().toString()));
 
                 //sends the message to the server
                 if (mTcpClient != null) {
@@ -95,7 +95,7 @@ public class MainActivity extends Activity {
                 String message = editText.getText().toString();
 
                 //add the text in the arrayList
-                putMessage(new ChatMessage(-1, message, myName, clientName, new Date().toString()));
+                putMessage(new ChatMessage(-1, message, "S. " + myName, clientName, new Date().toString()));
 
                 //broadcast to server the message to be sent
                 Intent intentToSend = new Intent();
@@ -287,6 +287,7 @@ public class MainActivity extends Activity {
             clientIp = data.getStringExtra("clientIP");
             clientPort = data.getIntExtra("clientPort", clientPort);
             serverPort = data.getIntExtra("serverPort", serverPort);
+            myName = data.getStringExtra("myName");
             Log.d(TAG, "Set data complete");
             dataFetched = true;
         }

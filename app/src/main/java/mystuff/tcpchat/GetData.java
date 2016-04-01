@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 public class GetData extends Activity {
 
+    private TextView myNameView;
     private TextView clientIpView;
     private TextView clientPortView;
     private TextView serverPortView;
@@ -26,6 +27,7 @@ public class GetData extends Activity {
 
         Log.d(TAG, "Started getdata");
 
+        myNameView = (TextView) findViewById(R.id.myNameField);
         clientIpView = (TextView) findViewById(R.id.clientIpField);
         clientPortView = (TextView) findViewById(R.id.clientPortField);
         serverPortView = (TextView) findViewById(R.id.serverPortField);
@@ -43,19 +45,22 @@ public class GetData extends Activity {
     private void fetchData(Intent intent){
         try{
             Log.d(TAG, "Fetching data");
+            String myName = myNameView.getText().toString();
             String clientIP = clientIpView.getText().toString();
             int clientPort = Integer.parseInt(clientPortView.getText().toString());
             int serverPort = Integer.parseInt(serverPortView.getText().toString());
             //FOR TESTING ONLY
+            myName = "Agilulfo";
             clientIP = NetworkUtils.getIPAddress(true);
             clientPort = 6789;
             serverPort = 6789;
-            if(!clientIP.equals("") && clientPort > 1024 && serverPort > 1024){
+            if(!myName.equals("") && !clientIP.equals("") && clientPort > 1024 && serverPort > 1024){
+                intent.putExtra("myName", myName);
                 intent.putExtra("clientIP", clientIP);
                 intent.putExtra("clientPort", clientPort);
                 intent.putExtra("serverPort", serverPort);
                 setResult(MainActivity.DATAOK, intent);
-                Log.d(TAG, "Data fetched succesfully: client(" + clientIP + ":" + clientPort + ") server(:" + serverPort + ")");
+                Log.d(TAG, "Data fetched succesfully: name(" + myName + ") client(" + clientIP + ":" + clientPort + ") server(:" + serverPort + ")");
                 Log.d(TAG, "RESULT: " + MainActivity.DATAOK);
                 finish();
             }
