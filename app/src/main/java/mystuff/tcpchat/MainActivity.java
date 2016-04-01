@@ -106,7 +106,10 @@ public class MainActivity extends Activity {
     }
 
     private void startServerService(int port){
-        startService(new Intent(this, ServerService.class).putExtra("port", port));
+        Intent intent = new Intent(this, ServerService.class);
+        intent.putExtra("myname", myName);
+        intent.putExtra("port", port);
+        startService(intent);
     }
 
     private void stopServerService(){
@@ -232,6 +235,7 @@ public class MainActivity extends Activity {
                         extra.getString("receiver"),
                         extra.getString("date")
                 );
+                clientName = extra.getString("sender");
                 Log.d(TAG, "Received a broadcast message: " + message);
                 putMessage(message);
                 mAdapter.notifyDataSetChanged();

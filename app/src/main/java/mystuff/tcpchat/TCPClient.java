@@ -14,7 +14,7 @@ public class TCPClient {
 
     private final String TAG = "tcpclient";
     private String serverMessage;
-    private String clientName = "Client";
+    private String myName = "Client";
     private String serverName;
     public static String SERVERIP = "192.168.0.101"; //your computer IP address
     //public static String SERVERIP = "172.16.147.144";
@@ -39,7 +39,7 @@ public class TCPClient {
     }
 
     public void setName(String name){
-        this.clientName = name;
+        this.myName = name;
     }
 
     /**
@@ -93,31 +93,27 @@ public class TCPClient {
 
             try {
 
-                //output to the server
-                out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+                InputStream inputStream = socket.getInputStream();
+                OutputStream outputStream = socket.getOutputStream();
+                //output to the client
+                PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(outputStream)), true);
+                //input from the client
+                BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
 
-                Bundle startingData = new Bundle();
-                startingData.putCharSequence("myname", clientName);
-                out.print(startingData);
-                Log.d(TAG, "Done.");
-
-
-                //Try to get server name, it should be the first object sent
-                ObjectInputStream objectIn = new ObjectInputStream(socket.getInputStream());
-                Object firstReceived = objectIn.readObject();
-                serverName = ((Bundle) firstReceived).getString("myname");
-                if(serverName != null){
-                    Log.d(TAG, "First received was name! " + serverName);
-                    mMessageListener.receivedServerName(serverName);
+                //Exchange names
+                out.println("mynameis");
+                out.println(myName);
+                Log.d(TAG, "Trying to get server name..");
+                //Try to get server name, it should be the first String sent
+                if((serverMessage = in.readLine()).equals("mynameis")){
+                    Log.d(TAG, "First message received should be the name..");
+                    serverName = in.readLine();
+                    Log.d(TAG, "serverName found: " + serverName);
                 }
                 else{
-                    Log.d(TAG, "First received wasn't name.. " + serverName);
-                    mMessageListener.messageReceived((String) firstReceived);
+                    Log.d(TAG, "First message wasn't server name..");
+                    mMessageListener.messageReceived(serverMessage);
                 }
-                objectIn.close();
-
-                //input from server
-                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
                 //listen for response from server
                 while (mRun) {
