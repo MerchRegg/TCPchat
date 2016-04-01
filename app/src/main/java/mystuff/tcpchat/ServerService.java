@@ -1,8 +1,10 @@
 package mystuff.tcpchat;
 
 import android.app.IntentService;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -38,6 +40,10 @@ public class ServerService extends IntentService {
     private String myName;
     private String clientName = "unknown";
 
+    private MainActivityBroadcastReceiver broadcastReceiver;
+    private PrintWriter out;
+    private BufferedReader in;
+
     public ServerService() {
         super("ServerService");
     }
@@ -47,14 +53,18 @@ public class ServerService extends IntentService {
         port = intent.getIntExtra("port", port);
         myName = intent.getStringExtra("myname");
         String received = "";
-        Log.d(TAG, "Created server socket at " + ip + ":" + port);
 
         Intent intentToSend = new Intent();
         intentToSend.setAction(BROADCAST);
 
+        //create broadcast receiver
+        broadcastReceiver = new MainActivityBroadcastReceiver();
+        registerReceiver(broadcastReceiver, new IntentFilter(MainActivity.BROADCAST));
+
         if (intent != null) {
             try {
                 ServerSocket serverSocket = new ServerSocket(port);
+                Log.d(TAG, "Created server socket at " + ip + ":" + port);
 
                 //notify the main activity
                 sendBroadcast(intentToSend.putExtra(SERVER_STARTED, true));
@@ -65,9 +75,9 @@ public class ServerService extends IntentService {
                 InputStream inputStream = socket.getInputStream();
                 OutputStream outputStream = socket.getOutputStream();
                 //output to the client
-                PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(outputStream)), true);
+                out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(outputStream)), true);
                 //input from the client
-                BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+                in = new BufferedReader(new InputStreamReader(inputStream));
 
                 //Exchange names
                 out.println("mynameis");
@@ -109,8 +119,15 @@ public class ServerService extends IntentService {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                unregisterReceiver(broadcastReceiver);
             }
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(broadcastReceiver);
     }
 
     private void broadcastMessage(Intent intentToSend, String text){
@@ -130,5 +147,15 @@ public class ServerService extends IntentService {
         intentToSend.putExtra(RECEIVED_CLIENT_NAME, true);
         intentToSend.putExtra(CLIENT_NAME, clientName);
         sendBroadcast(intentToSend);
+    }
+
+    private class MainActivityBroadcastReceiver extends BroadcastReceiver{
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Received a broadcast message");
+            String message = intent.getStringExtra(MainActivity.MESSAGE_TO_SEND);
+            out.println(message);
+            Log.d(TAG, "New message sent: " + message);
+        }
     }
 }

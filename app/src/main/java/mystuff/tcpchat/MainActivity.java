@@ -40,6 +40,8 @@ public class MainActivity extends Activity {
     public static final int DATARETREIVE = 17;
     public static final int DATAOK = 19;
     public static final int DATAERROR = -1;
+    public static final String MESSAGE_TO_SEND = "text";
+    protected static final String BROADCAST = "MainActivityBroadcast";
     private int serverPort = 6789;
     private int clientPort = 6789;
     private String clientIp = NetworkUtils.getIPAddress(true);
@@ -67,11 +69,12 @@ public class MainActivity extends Activity {
         sendToServerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d(TAG, "Sending to server " + serverName);
 
                 String message = editText.getText().toString();
 
                 //add the text in the arrayList
-                putMessage(new ChatMessage(-1, message, myName, serverName, new Date().toString()));
+                putMessage(new ChatMessage(-1, message, mTcpClient.getMyName(), serverName, new Date().toString()));
 
                 //sends the message to the server
                 if (mTcpClient != null) {
@@ -87,13 +90,17 @@ public class MainActivity extends Activity {
         sendToClientBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d(TAG, "Sending to client " + clientName);
 
                 String message = editText.getText().toString();
 
                 //add the text in the arrayList
                 putMessage(new ChatMessage(-1, message, myName, clientName, new Date().toString()));
 
-                //TODO SEND TO SERVER
+                //broadcast to server the message to be sent
+                Intent intentToSend = new Intent();
+                intentToSend.putExtra(MESSAGE_TO_SEND, message);
+                sendBroadcast(intentToSend);
 
                 //refresh the list
                 mAdapter.notifyDataSetChanged();
@@ -121,7 +128,7 @@ public class MainActivity extends Activity {
 
     private void startServerService(int port){
         Intent intent = new Intent(this, ServerService.class);
-        intent.putExtra("myname", "S." + myName);
+        intent.putExtra("myname", "S. " + myName);
         intent.putExtra("port", port);
         startService(intent);
     }
@@ -166,7 +173,7 @@ public class MainActivity extends Activity {
                 }
             });
             mTcpClient.setServer(clientIp, clientPort);
-            mTcpClient.setName(myName);
+            mTcpClient.setName("C. " + myName);
             mTcpClient.run();
 
             return null;

@@ -22,8 +22,8 @@ public class TCPClient {
     private MessageReceivedListener mMessageListener = null;
     private boolean mRun = false;
 
-    PrintWriter out;
-    BufferedReader in;
+    private PrintWriter out;
+    private BufferedReader in;
 
     /**
      *  Constructor of the class. OnMessagedReceived listens for the messages received from server
@@ -96,9 +96,9 @@ public class TCPClient {
                 InputStream inputStream = socket.getInputStream();
                 OutputStream outputStream = socket.getOutputStream();
                 //output to the client
-                PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(outputStream)), true);
+                out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(outputStream)), true);
                 //input from the client
-                BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+                in = new BufferedReader(new InputStreamReader(inputStream));
 
                 //Exchange names
                 out.println("mynameis");
@@ -152,5 +152,9 @@ public class TCPClient {
     public interface MessageReceivedListener {
         void messageReceived(String message);
         void receivedServerName(String name);
+    }
+
+    public String getMyName(){
+        return myName;
     }
 }
