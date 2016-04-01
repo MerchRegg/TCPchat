@@ -109,6 +109,7 @@ public class TCPClient {
                     Log.d(TAG, "First message received should be the name..");
                     serverName = in.readLine();
                     Log.d(TAG, "serverName found: " + serverName);
+                    mMessageListener.receivedServerName(serverName);
                 }
                 else{
                     Log.d(TAG, "First message wasn't server name..");

@@ -30,6 +30,8 @@ public class MainActivity extends Activity {
     private BaseAdapter mAdapter;
     private TCPClient mTcpClient;
     private ServerBroadcastReceiver broadcastReceiver;
+    private Button sendToServerBtn;
+    private Button sendToClientBtn;
 
     private String myName = "Agilulfo";
     private String clientName;
@@ -50,7 +52,8 @@ public class MainActivity extends Activity {
 
 
         final EditText editText = (EditText) findViewById(R.id.editText);
-        Button sendBtn = (Button)findViewById(R.id.send_button);
+        sendToServerBtn = (Button)findViewById(R.id.send_to_server_button);
+        sendToClientBtn = (Button)findViewById(R.id.send_to_client_button);
 
         //set the adapter for the list
         mList = (ListView)findViewById(R.id.list);
@@ -61,23 +64,14 @@ public class MainActivity extends Activity {
         broadcastReceiver = new ServerBroadcastReceiver();
         registerReceiver(broadcastReceiver, new IntentFilter(ServerService.BROADCAST));
 
-
-
-        /**
-         * NOW this is done when received a broadcast message from the server that says it is started.
-        //connect to server
-        checkConnectivity();
-        new clientTask().execute("");
-         */
-
-        sendBtn.setOnClickListener(new View.OnClickListener() {
+        sendToServerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 String message = editText.getText().toString();
 
                 //add the text in the arrayList
-                putMessage(new ChatMessage(-1, message, "Client", "Server", new Date().toString()));
+                putMessage(new ChatMessage(-1, message, myName, serverName, new Date().toString()));
 
                 //sends the message to the server
                 if (mTcpClient != null) {
@@ -90,11 +84,31 @@ public class MainActivity extends Activity {
             }
         });
 
+        sendToClientBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                String message = editText.getText().toString();
+
+                //add the text in the arrayList
+                putMessage(new ChatMessage(-1, message, myName, clientName, new Date().toString()));
+
+                //TODO SEND TO SERVER
+
+                //refresh the list
+                mAdapter.notifyDataSetChanged();
+                editText.setText("");
+            }
+        });
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "myname: " + myName + " clientName: " + clientName + " serverName: " + serverName);
+        sendToClientBtn.setText("Send to " + clientName);
+        sendToServerBtn.setText("Send to " + serverName);
         if(dataFetched){
             //start a server
             startServerService(serverPort);
@@ -107,7 +121,7 @@ public class MainActivity extends Activity {
 
     private void startServerService(int port){
         Intent intent = new Intent(this, ServerService.class);
-        intent.putExtra("myname", myName);
+        intent.putExtra("myname", "S." + myName);
         intent.putExtra("port", port);
         startService(intent);
     }
@@ -148,6 +162,7 @@ public class MainActivity extends Activity {
                 public void receivedServerName(String name) {
                     Log.d(TAG, "Received server name: " + name);
                     serverName = name;
+                    publishProgress();
                 }
             });
             mTcpClient.setServer(clientIp, clientPort);
@@ -160,13 +175,18 @@ public class MainActivity extends Activity {
         @Override
         protected void onProgressUpdate(String[] values) {
             super.onProgressUpdate(values);
-
-            Log.d(TAG, "Received message: " + values[0]);
-            //add the messaged received from server
-            putMessage(new ChatMessage(-1, values[0], serverName, myName, new Date().toString()));
-            // notify the adapter that the data set has changed. This means that new message received
-            // from server was added to the list
-            mAdapter.notifyDataSetChanged();
+            if(values.length < 1){
+                sendToServerBtn.setText("Send to " + serverName);
+                Log.d(TAG, "Server name set.");
+            }
+            else {
+                Log.d(TAG, "Received message: " + values[0]);
+                //add the messaged received from server
+                putMessage(new ChatMessage(-1, values[0], serverName, myName, new Date().toString()));
+                // notify the adapter that the data set has changed. This means that new message received
+                // from server was added to the list
+                mAdapter.notifyDataSetChanged();
+            }
         }
     }
 
@@ -221,11 +241,15 @@ public class MainActivity extends Activity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getBooleanExtra("ServerStarted", false)){
+            if(intent.getBooleanExtra(ServerService.SERVER_STARTED, false)){
                 Log.d(TAG, "Server has started, starting client");
                 //connect to server
                 checkConnectivity();
                 new clientTask().execute("");
+            }
+            else if(intent.getBooleanExtra(ServerService.RECEIVED_CLIENT_NAME, false)){
+                Log.d(TAG, "Received client name: " + (clientName = intent.getStringExtra(ServerService.CLIENT_NAME)));
+                sendToClientBtn.setText("Send to " + clientName);
             }
             else{
                 Bundle extra = intent.getExtras();

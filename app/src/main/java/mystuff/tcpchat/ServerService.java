@@ -29,6 +29,9 @@ import mystuff.tcpchat.database.ChatMessage;
  */
 public class ServerService extends IntentService {
     protected static final String BROADCAST = "ServerServiceBroadcast";
+    protected static final String RECEIVED_CLIENT_NAME = "ReceivedClientName";
+    protected static final String SERVER_STARTED = "ServerStarted";
+    protected static final String CLIENT_NAME = "clientName";
     private static final String TAG = "serverservice";
     private int port = 5678;
     private String ip = NetworkUtils.getIPAddress(true);
@@ -54,7 +57,7 @@ public class ServerService extends IntentService {
                 ServerSocket serverSocket = new ServerSocket(port);
 
                 //notify the main activity
-                sendBroadcast(intentToSend.putExtra("ServerStarted", true));
+                sendBroadcast(intentToSend.putExtra(SERVER_STARTED, true));
                 Log.d(TAG, "Notified start to main activity");
 
                 Socket socket = serverSocket.accept();
@@ -75,6 +78,7 @@ public class ServerService extends IntentService {
                     Log.d(TAG, "First message received should be the name..");
                     clientName = in.readLine();
                     Log.d(TAG, "clientName found: " + clientName);
+                    broadcastClientName(intentToSend, clientName);
                 }
                 else{
                     Log.d(TAG, "First message wasn't server name..");
@@ -116,6 +120,15 @@ public class ServerService extends IntentService {
         intentToSend.putExtra("sender", clientName);
         intentToSend.putExtra("receiver", myName);
         intentToSend.putExtra("date", new Date().toString());
+        sendBroadcast(intentToSend);
+    }
+
+    private void broadcastClientName(Intent intentToSend, String name){
+        Log.d(TAG, "broadcasting client name: " + name);
+        intentToSend = new Intent();
+        intentToSend.setAction(BROADCAST);
+        intentToSend.putExtra(RECEIVED_CLIENT_NAME, true);
+        intentToSend.putExtra(CLIENT_NAME, clientName);
         sendBroadcast(intentToSend);
     }
 }
