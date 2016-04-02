@@ -7,7 +7,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ToggleButton;
 import android.widget.Toast;
 
 public class GetData extends Activity {
@@ -17,8 +20,10 @@ public class GetData extends Activity {
     private TextView clientPortView;
     private TextView serverPortView;
     private Button okButton;
+    private ToggleButton testButton;
 
     private final String TAG = "getdata";
+    private boolean testing = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,11 +32,22 @@ public class GetData extends Activity {
 
         Log.d(TAG, "Started getdata");
 
+        TextView ipView = ((TextView) findViewById(R.id.my_address_field));
+        ipView.append(NetworkUtils.getIPAddress(true));
         myNameView = (TextView) findViewById(R.id.myNameField);
         clientIpView = (TextView) findViewById(R.id.clientIpField);
         clientPortView = (TextView) findViewById(R.id.clientPortField);
         serverPortView = (TextView) findViewById(R.id.serverPortField);
         okButton = (Button) findViewById(R.id.okButton);
+        testButton = (ToggleButton) findViewById(R.id.testingButton);
+
+        testButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                testing = isChecked;
+                Toast.makeText(getBaseContext(), "Change testing state: " + testing, Toast.LENGTH_LONG).show();
+            }
+        });
 
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -44,18 +60,23 @@ public class GetData extends Activity {
 
     private void fetchData(Intent intent){
         try{
-            Log.d(TAG, "Fetching data");
+            Log.d(TAG, "Fetching data (" + testing + ")");
             String myName = myNameView.getText().toString();
             String clientIP = clientIpView.getText().toString();
             int clientPort = Integer.parseInt(clientPortView.getText().toString());
             int serverPort = Integer.parseInt(serverPortView.getText().toString());
-            //FOR TESTING ONLY
-            /*
-            myName = "Agilulfo";
-            clientIP = NetworkUtils.getIPAddress(true);
-            clientPort = 6789;
-            serverPort = 6789;
-            */
+
+            if(testing) {
+                //FOR TESTING ONLY
+                /*
+                */
+                myName = "Agilulfo";
+                clientIP = NetworkUtils.getIPAddress(true);
+                //Log.d(TAG, NetworkUtils.lastTryForIp(this) + " " +NetworkUtils.anotherTryForIp() + " " + NetworkUtils.getIPAddress(true));
+                clientPort = 6789;
+                serverPort = 6789;
+                Log.d(TAG, "Data set as default for testing: "+myName+" "+clientIP+":"+clientPort+" "+serverPort);
+            }
             if(!myName.equals("") && !clientIP.equals("") && clientPort > 1024 && serverPort > 1024){
                 intent.putExtra("myName", myName);
                 intent.putExtra("clientIP", clientIP);

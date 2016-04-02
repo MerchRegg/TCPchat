@@ -2,17 +2,24 @@ package mystuff.tcpchat; /**
  * Created by marco on 22/03/16.
  */
 
+import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.util.Log;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 //import org.apache.http.conn.util.InetAddressUtils;
 
 public class NetworkUtils {
+    private static final String TAG = "networkutils";
 
     /**
      * Convert byte array to hex string
@@ -99,17 +106,20 @@ public class NetworkUtils {
 
     /**
      * Get IP address from first non-localhost interface
-     * @param ipv4  true=return ipv4, false=return ipv6
+     * @param useIPv4 true=return ipv4, false=return ipv6
      * @return  address or empty string
      */
     public static String getIPAddress(boolean useIPv4) {
         try {
             List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+            Log.d(TAG, "Got interfaces");
             for (NetworkInterface intf : interfaces) {
                 List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
+                Log.d(TAG, "Got addresses");
                 for (InetAddress addr : addrs) {
                     if (!addr.isLoopbackAddress()) {
                         String sAddr = addr.getHostAddress();
+                        Log.d(TAG, "Got address: " + sAddr);
                         //boolean isIPv4 = InetAddressUtils.isIPv4Address(sAddr);
                         boolean isIPv4 = sAddr.indexOf(':')<0;
 
@@ -123,12 +133,54 @@ public class NetworkUtils {
                             }
                         }
                     }
+                    else{
+                        Log.d(TAG, "Address not good");
+                    }
                 }
             }
-        } catch (Exception ex) { } // for now eat exceptions
+        } catch (Exception ex) {
+            Log.e(TAG, "ERROR");
+            ex.printStackTrace();
+        }
+        Log.e(TAG, "It was impossible to find the address");
+        return anotherTryForIp();
+    }
+
+    public static String anotherTryForIp(){
+        InetAddress addrs[] = new InetAddress[0];
+        try {
+            addrs = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        for (InetAddress addr : addrs) {
+            Log.d(TAG, "addr.getHostAddress() = " + addr.getHostAddress());
+            Log.d(TAG, "addr.getHostName() = " + addr.getHostName());
+            Log.d(TAG, "addr.isAnyLocalAddress() = " + addr.isAnyLocalAddress());
+            Log.d(TAG, "addr.isLinkLocalAddress() = " + addr.isLinkLocalAddress());
+            Log.d(TAG, "addr.isLoopbackAddress() = " + addr.isLoopbackAddress());
+            Log.d(TAG, "addr.isMulticastAddress() = " + addr.isMulticastAddress());
+            Log.d(TAG, "addr.isSiteLocalAddress() = " + addr.isSiteLocalAddress());
+
+            if (!addr.isLoopbackAddress()) {// && addr.isSiteLocalAddress()) {
+                return addr.getHostAddress();
+            }
+        }
         return "";
     }
 
+    public static String lastTryForIp(Context context){
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        int ip = wifiInfo.getIpAddress();
+        String ipString = String.format(
+                "%d.%d.%d.%d",
+                (ip & 0xff),
+                (ip >> 8 & 0xff),
+                (ip >> 16 & 0xff),
+                (ip >> 24 & 0xff));
+        return ipString;
+    }
 
 
 }

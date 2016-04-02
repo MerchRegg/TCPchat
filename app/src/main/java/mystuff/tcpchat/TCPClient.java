@@ -62,7 +62,7 @@ public class TCPClient {
         out.close();
     }
 
-    public void run() {
+    public void run() throws StartClientException{
 
         mRun = true;
 
@@ -85,7 +85,7 @@ public class TCPClient {
                 }
             }
             if(socket == null){
-                throw new ConnectException("Failed all attempts to connect!");
+                throw new StartClientException("Failed all attempts to connect!");
             }
 
             Log.d(TAG, "Connected! SERVERIP:"+SERVERIP+" PORT:"+SERVERPORT);

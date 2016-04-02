@@ -34,6 +34,8 @@ public class MainActivity extends Activity {
     private TextView myAddressView;
     private Button sendToServerBtn;
     private Button sendToClientBtn;
+    private Button startServerBtn;
+    private Button startClientBtn;
 
     private String myName = "Agilulfo";
     private String clientName;
@@ -50,6 +52,8 @@ public class MainActivity extends Activity {
     private String clientIp = NetworkUtils.getIPAddress(true);
     private String myIp;
     private boolean dataFetched = false;
+    private boolean serverStarted = false;
+    private boolean clientStarted = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,6 +66,8 @@ public class MainActivity extends Activity {
         final EditText editText = (EditText) findViewById(R.id.editText);
         sendToServerBtn = (Button)findViewById(R.id.send_to_server_button);
         sendToClientBtn = (Button)findViewById(R.id.send_to_client_button);
+        startServerBtn = (Button)findViewById(R.id.start_server_button);
+        startClientBtn = (Button)findViewById(R.id.start_client_button);
         myAddressView = (TextView)findViewById(R.id.my_address_field);
         mList = (ListView)findViewById(R.id.list);
 
@@ -107,9 +113,7 @@ public class MainActivity extends Activity {
                 putMessage(new ChatMessage(-1, message, "S. " + myName, clientName, new Date().toString()));
 
                 //broadcast to server the message to be sent
-                Intent intentToSend = new Intent();
-                intentToSend.putExtra(MESSAGE_TO_SEND, message);
-                sendBroadcast(intentToSend);
+                broadcastMessage(new Intent(), message, MESSAGE_TO_SEND, BROADCAST);
 
                 //refresh the list
                 mAdapter.notifyDataSetChanged();
@@ -117,22 +121,40 @@ public class MainActivity extends Activity {
             }
         });
 
+        startServerBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(dataFetched){
+                    Log.d(TAG, "Starting server");
+                    startServerService(serverPort);
+                }
+            }
+        });
+
+        startClientBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Starting client");
+                //connect to server
+                checkConnectivity();
+                new clientTask().execute("");
+                enableSendToClient();
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "myname: " + myName + " clientName: " + clientName + " serverName: " + serverName);
-        sendToClientBtn.setText("Send to " + clientName);
-        sendToServerBtn.setText("Send to " + serverName);
+        Log.d(TAG, "resume myname: " + myName + " clientName: " + clientName + " serverName: " + serverName);
         if(dataFetched){
             //start a server
             myAddressView.setText("your address is: " + myIp + ":" + serverPort);
-            startServerService(serverPort);
+            //startServerService(serverPort);
         }
         else{
             Log.d(TAG, "Data not fetched yet, starting GetData");
-            startInsertDataActivity(DATARETREIVE);
+            startInsertDataActivity(DATARETREIVE, true);
         }
     }
 
@@ -184,8 +206,12 @@ public class MainActivity extends Activity {
             });
             mTcpClient.setServer(clientIp, clientPort);
             mTcpClient.setName("C. " + myName);
-            mTcpClient.run();
-
+            try {
+                mTcpClient.run();
+                clientStarted = true;
+            } catch (StartClientException e) {
+                e.printStackTrace();
+            }
             return null;
         }
 
@@ -259,10 +285,8 @@ public class MainActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getBooleanExtra(ServerService.SERVER_STARTED, false)){
-                Log.d(TAG, "Server has started, starting client");
-                //connect to server
-                checkConnectivity();
-                new clientTask().execute("");
+                Log.d(TAG, "Server has started, default client could start now");
+                enableSendToServer();
             }
             else if(intent.getBooleanExtra(ServerService.RECEIVED_CLIENT_NAME, false)){
                 Log.d(TAG, "Received client name: " + (clientName = intent.getStringExtra(ServerService.CLIENT_NAME)));
@@ -284,8 +308,9 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void startInsertDataActivity(int reqType){
+    private void startInsertDataActivity(int reqType, boolean forTesting){
         Intent intent = new Intent(this, GetData.class);
+        intent.putExtra("testing", forTesting);
         Log.d(TAG, "Starting activity to get data");
         startActivityForResult(intent, reqType);
     }
@@ -301,5 +326,24 @@ public class MainActivity extends Activity {
             Log.d(TAG, "Set data complete");
             dataFetched = true;
         }
+    }
+
+    private void enableSendToClient() {
+        clientStarted = true;
+        startClientBtn.setVisibility(View.GONE);
+        sendToClientBtn.setVisibility(View.VISIBLE);
+    }
+
+    private void enableSendToServer() {
+        serverStarted = true;
+        startServerBtn.setVisibility(View.GONE);
+        sendToServerBtn.setVisibility(View.VISIBLE);
+    }
+
+    private void broadcastMessage(Intent intent, String message, String extraName, String action){
+        Log.d(TAG, "broadcasting to server: " + message);
+        intent.setAction(action);
+        intent.putExtra(extraName, message);
+        sendBroadcast(intent);
     }
 }

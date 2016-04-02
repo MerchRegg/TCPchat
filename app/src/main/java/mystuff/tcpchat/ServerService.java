@@ -60,6 +60,7 @@ public class ServerService extends IntentService {
         //create broadcast receiver
         broadcastReceiver = new MainActivityBroadcastReceiver();
         registerReceiver(broadcastReceiver, new IntentFilter(MainActivity.BROADCAST));
+        Log.d(TAG, "Registered broadcastreceiver");
 
         if (intent != null) {
             try {
