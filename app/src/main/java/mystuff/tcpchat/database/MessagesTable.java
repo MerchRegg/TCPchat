@@ -4,6 +4,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 public class MessagesTable {
+    private static final String TAG = "messagestable";
     // Database table
     public static final String TABLE_MESSAGES = "messages";
     public static final String COLUMN_ID = "_id";
@@ -24,14 +25,20 @@ public class MessagesTable {
             + ");";
 
     public static void onCreate(SQLiteDatabase database) {
+        Log.d(TAG, "create database");
         database.execSQL(DATABASE_CREATE);
     }
 
     public static void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-        Log.w(ChatMessage.class.getName(), "Upgrading database from version "
+        Log.d(TAG, "Upgrading database from version "
                 + oldVersion + " to " + newVersion
                 + ", which will destroy all old data");
         database.execSQL("DROP TABLE IF EXISTS " + TABLE_MESSAGES);
         onCreate(database);
+    }
+
+    public static void deleteRecords (SQLiteDatabase database){
+        Log.d(TAG, "deleting data from database");
+        database.delete(TABLE_MESSAGES, null, null);
     }
 }

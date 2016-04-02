@@ -17,6 +17,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Date;
@@ -30,6 +31,7 @@ public class MainActivity extends Activity {
     private BaseAdapter mAdapter;
     private TCPClient mTcpClient;
     private ServerBroadcastReceiver broadcastReceiver;
+    private TextView myAddressView;
     private Button sendToServerBtn;
     private Button sendToClientBtn;
 
@@ -42,9 +44,11 @@ public class MainActivity extends Activity {
     public static final int DATAERROR = -1;
     public static final String MESSAGE_TO_SEND = "text";
     protected static final String BROADCAST = "MainActivityBroadcast";
+    //These are default values for testing.
     private int serverPort = 6789;
     private int clientPort = 6789;
     private String clientIp = NetworkUtils.getIPAddress(true);
+    private String myIp;
     private boolean dataFetched = false;
 
     @Override
@@ -52,13 +56,18 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        //Erease database
+        //getContentResolver().delete(ChatMessagesContentProvider.CONTENT_URI, null, null);
 
         final EditText editText = (EditText) findViewById(R.id.editText);
         sendToServerBtn = (Button)findViewById(R.id.send_to_server_button);
         sendToClientBtn = (Button)findViewById(R.id.send_to_client_button);
+        myAddressView = (TextView)findViewById(R.id.my_address_field);
+        mList = (ListView)findViewById(R.id.list);
+
+        myIp = NetworkUtils.getIPAddress(true);
 
         //set the adapter for the list
-        mList = (ListView)findViewById(R.id.list);
         mAdapter = new ChatMessageDbAdapter(this);
         mList.setAdapter(mAdapter);
 
@@ -118,6 +127,7 @@ public class MainActivity extends Activity {
         sendToServerBtn.setText("Send to " + serverName);
         if(dataFetched){
             //start a server
+            myAddressView.setText("your address is: " + myIp + ":" + serverPort);
             startServerService(serverPort);
         }
         else{

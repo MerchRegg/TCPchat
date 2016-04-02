@@ -50,10 +50,12 @@ public class GetData extends Activity {
             int clientPort = Integer.parseInt(clientPortView.getText().toString());
             int serverPort = Integer.parseInt(serverPortView.getText().toString());
             //FOR TESTING ONLY
+            /*
             myName = "Agilulfo";
             clientIP = NetworkUtils.getIPAddress(true);
             clientPort = 6789;
             serverPort = 6789;
+            */
             if(!myName.equals("") && !clientIP.equals("") && clientPort > 1024 && serverPort > 1024){
                 intent.putExtra("myName", myName);
                 intent.putExtra("clientIP", clientIP);
