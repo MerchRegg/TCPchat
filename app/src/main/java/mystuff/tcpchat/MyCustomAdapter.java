@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 /**
  * A BaseAdapter that visualizes the content of an array of Strings
+ * NOT USED ANYMORE
  */
 public class MyCustomAdapter extends BaseAdapter {
     private ArrayList<String> mListItems;

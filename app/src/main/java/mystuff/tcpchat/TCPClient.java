@@ -32,12 +32,21 @@ public class TCPClient {
         mMessageListener = listener;
     }
 
+    /**
+     * Sets the given parameters as server's IP and Port
+     * @param ip String, the ip of the server to connect to
+     * @param port int, the port of the server to connect to
+     */
     public void setServer(String ip, int port){
         if(!ip.equals(""))
             SERVERIP = ip;
         SERVERPORT = port;
     }
 
+    /**
+     * Sets the name of this client
+     * @param name String, the name to set
+     */
     public void setName(String name){
         this.myName = name;
     }
@@ -62,6 +71,10 @@ public class TCPClient {
         out.close();
     }
 
+    /**
+     * Connects to a server socket and communicates with it
+     * @throws StartClientException if the connection fails
+     */
     public void run() throws StartClientException{
 
         mRun = true;
@@ -147,8 +160,9 @@ public class TCPClient {
 
     }
 
-    //Declare the interface. The method messageReceived(String message) will must be implemented in the MyActivity
-    //class at on asynckTask doInBackground
+    /**
+     * Interface to be implemented in the main activity
+     */
     public interface MessageReceivedListener {
         void messageReceived(String message);
         void receivedServerName(String name);

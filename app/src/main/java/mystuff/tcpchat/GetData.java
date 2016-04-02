@@ -13,6 +13,11 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.Toast;
 
+/**
+ * Activity to get data from user as:
+ * The IP and port of the server to connect to,
+ * the port to set for the user's server.
+ */
 public class GetData extends Activity {
 
     private TextView myNameView;
@@ -58,6 +63,10 @@ public class GetData extends Activity {
         Log.d(TAG, "Initialized getdata");
     }
 
+    /**
+     * Retreives the data set by the user and ends, if the data are consistent
+     * @param intent Intent, the intent with which this activity has been started
+     */
     private void fetchData(Intent intent){
         try{
             Log.d(TAG, "Fetching data (" + testing + ")");

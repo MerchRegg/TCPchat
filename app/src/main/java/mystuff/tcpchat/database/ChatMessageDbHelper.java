@@ -26,6 +26,10 @@ public class ChatMessageDbHelper extends SQLiteOpenHelper {
         MessagesTable.onUpgrade(db, oldVersion, newVersion);
     }
 
+    /**
+     * Use this method to delete the records in the database
+     * @param db the database to clean
+     */
     public void deleteAll(SQLiteDatabase db){
         Log.d(TAG, "database data wipe out");
         MessagesTable.deleteRecords(db);

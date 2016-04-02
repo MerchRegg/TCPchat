@@ -146,6 +146,10 @@ public class NetworkUtils {
         return anotherTryForIp();
     }
 
+    /**
+     * Another method for taking the ip address
+     * @return String, the ip address of the device
+     */
     public static String anotherTryForIp(){
         InetAddress addrs[] = new InetAddress[0];
         try {
@@ -169,6 +173,10 @@ public class NetworkUtils {
         return "";
     }
 
+    /**
+     * Another method for taking the ip address
+     * @return String, the ip address of the device
+     */
     public static String lastTryForIp(Context context){
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();

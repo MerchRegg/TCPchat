@@ -154,10 +154,14 @@ public class MainActivity extends Activity {
         }
         else{
             Log.d(TAG, "Data not fetched yet, starting GetData");
-            startInsertDataActivity(DATARETREIVE, true);
+            startInsertDataActivity(DATARETREIVE);
         }
     }
 
+    /**
+     * Starts a new ServerService Service with ServerSocket port specified
+     * @param port int, the port of the ServerSocket to be created by the server
+     */
     private void startServerService(int port){
         Intent intent = new Intent(this, ServerService.class);
         intent.putExtra("myname", "S. " + myName);
@@ -165,6 +169,9 @@ public class MainActivity extends Activity {
         startService(intent);
     }
 
+    /**
+     * Stops the ServerService
+     */
     private void stopServerService(){
         stopService(new Intent(this, ServerService.class));
     }
@@ -233,6 +240,10 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Adds the values of the given ChatMessage in the messages table in the current database
+     * @param message ChatMessage, the message to add in the database
+     */
     private void putMessage(ChatMessage message){
         Log.d(TAG, "put message: " + message);
         ContentValues chatMessageValues = new ContentValues();
@@ -243,6 +254,9 @@ public class MainActivity extends Activity {
         Log.d(TAG, "put in: " + getContentResolver().insert(ChatMessagesContentProvider.CONTENT_URI, chatMessageValues).toString());
     }
 
+    /**
+     * Debug method to print all messages in the messages table in the current database
+     */
     private void printDatabase(){
         Log.d(TAG, "printing database..");
         Cursor cursor = getContentResolver().query(ChatMessagesContentProvider.CONTENT_URI, null, null, null, null);
@@ -264,6 +278,9 @@ public class MainActivity extends Activity {
         Log.d(TAG, "database printed.");
     }
 
+    /**
+     * Utility method to check connectivity on the device
+     */
     private void checkConnectivity(){
         ConnectivityManager connectivityManager = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
@@ -280,8 +297,10 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Receiver of broadcast messages sent by the server
+     */
     private class ServerBroadcastReceiver extends BroadcastReceiver{
-
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getBooleanExtra(ServerService.SERVER_STARTED, false)){
@@ -308,9 +327,12 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void startInsertDataActivity(int reqType, boolean forTesting){
+    /**
+     * Starts for result the activity GetData to retreive data from user
+     * @param reqType
+     */
+    private void startInsertDataActivity(int reqType){
         Intent intent = new Intent(this, GetData.class);
-        intent.putExtra("testing", forTesting);
         Log.d(TAG, "Starting activity to get data");
         startActivityForResult(intent, reqType);
     }
@@ -328,18 +350,31 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Enables the sendToClientBtn Button and makes the startClientBtn Button invisible
+     */
     private void enableSendToClient() {
         clientStarted = true;
         startClientBtn.setVisibility(View.GONE);
         sendToClientBtn.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Enables the sendToServerBtn Button and makes the startServerBtn Button invisible
+     */
     private void enableSendToServer() {
         serverStarted = true;
         startServerBtn.setVisibility(View.GONE);
         sendToServerBtn.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Sends a broadcast message with the specified parameters
+     * @param intent Intent, the intent to send
+     * @param message String, the message to send
+     * @param extraName String, the name of the extra where the message will be put
+     * @param action String, the action for the broadcast to set in the given intent
+     */
     private void broadcastMessage(Intent intent, String message, String extraName, String action){
         Log.d(TAG, "broadcasting to server: " + message);
         intent.setAction(action);

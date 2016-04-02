@@ -1,7 +1,7 @@
 package mystuff.tcpchat;
 
 /**
- * Created by marco on 02/04/16.
+ * A custom Exception class
  */
 public class StartClientException extends Exception {
     public StartClientException(String text){

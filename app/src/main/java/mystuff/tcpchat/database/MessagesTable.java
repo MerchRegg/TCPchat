@@ -24,11 +24,21 @@ public class MessagesTable {
             + COLUMN_DATE + " text not null"
             + ");";
 
+    /**
+     * Creates the table for the messages
+     * @param database the database on which create the table
+     */
     public static void onCreate(SQLiteDatabase database) {
         Log.d(TAG, "create database");
         database.execSQL(DATABASE_CREATE);
     }
 
+    /**
+     * Upgrades the given database creating a new table for messages
+     * @param database
+     * @param oldVersion
+     * @param newVersion
+     */
     public static void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
         Log.d(TAG, "Upgrading database from version "
                 + oldVersion + " to " + newVersion
@@ -37,6 +47,10 @@ public class MessagesTable {
         onCreate(database);
     }
 
+    /**
+     * Deletes the records in the messages table
+     * @param database
+     */
     public static void deleteRecords (SQLiteDatabase database){
         Log.d(TAG, "deleting data from database");
         database.delete(TABLE_MESSAGES, null, null);

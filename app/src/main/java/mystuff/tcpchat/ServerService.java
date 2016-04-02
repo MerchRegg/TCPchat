@@ -131,6 +131,11 @@ public class ServerService extends IntentService {
         unregisterReceiver(broadcastReceiver);
     }
 
+    /**
+     * Sends in broadcast the text received from the client connected
+     * @param intentToSend intent to send
+     * @param text String, the name of the client
+     */
     private void broadcastMessage(Intent intentToSend, String text){
         intentToSend = new Intent();
         intentToSend.setAction(BROADCAST);
@@ -141,6 +146,11 @@ public class ServerService extends IntentService {
         sendBroadcast(intentToSend);
     }
 
+    /**
+     * Sends in broadcast the name of the client that has created a socket connection to the ServerSocket of this Service
+     * @param intentToSend intent to send
+     * @param name String, the name of the client
+     */
     private void broadcastClientName(Intent intentToSend, String name){
         Log.d(TAG, "broadcasting client name: " + name);
         intentToSend = new Intent();
@@ -150,6 +160,9 @@ public class ServerService extends IntentService {
         sendBroadcast(intentToSend);
     }
 
+    /**
+     * Receiver of broadcast messages sent by the main activity
+     */
     private class MainActivityBroadcastReceiver extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
